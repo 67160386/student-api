@@ -9,9 +9,29 @@ app.get("/", (req, res) => {
 });
 
 let students = [
-  { id: 1, name: "สมชาย ใจดี", major: "วิทยาการคอมพิวเตอร์" },
-  { id: 2, name: "สมหญิง รักเรียน", major: "เทคโนโลยีสารสนเทศ" },
+  {
+    id: 1,
+    name: "สมชาย ใจดี",
+    major: "วิทยาการคอมพิวเตอร์",
+    email: "somchai@example.com",
+    phone: "080-000-0001",
+    courseIds: [101, 102],
+  },
+  {
+    id: 2,
+    name: "สมหญิง รักเรียน",
+    major: "เทคโนโลยีสารสนเทศ",
+    email: "somying@example.com",
+    phone: "080-000-0002",
+    courseIds: [102],
+  },
 ];
+
+let courses = [
+  { id: 101, courseName: "การเขียนโปรแกรมเบื้องต้น", credit: 3 },
+  { id: 102, courseName: "โครงสร้างข้อมูล", credit: 3 },
+];
+
 let nextId = 3;
 
 // 1. GET: ดึงรายการนักศึกษาทั้งหมด
@@ -82,6 +102,37 @@ app.delete("/api/v1/students/:id", (req, res) => {
 
   res.status(200).json({ message: "ลบข้อมูลสำเร็จ" });
 });
+
+app.get("/api/v1/students/:id/full", (req, res) => {
+  const id = Number(req.params.id);
+  const student = students.find((s) => s.id === id);
+
+  if (!student) {
+    return res.status(404).json({ message: "ไม่พบข้อมูลนักศึกษา" });
+  }
+
+  const studentCourses = courses.filter((c) =>
+    student.courseIds.includes(c.id),
+  );
+
+  res.status(200).json({
+    message: "สำเร็จ",
+    data: { ...student, courses: studentCourses },
+  });
+});
+
+const { graphqlHTTP } = require("express-graphql");
+const schema = require("./schema");
+const root = require("./resolvers");
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: schema,
+    rootValue: root,
+    graphiql: true, // เปิดใช้งานหน้าทดสอบ GraphiQL ผ่านเบราว์เซอร์
+  }),
+);
 
 app.listen(PORT, () => {
   console.log(`Server กำลังทำงานที่ http://localhost:${PORT}`);
