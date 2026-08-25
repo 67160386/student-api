@@ -1,5 +1,12 @@
 USE student_api;
 
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE students;
+TRUNCATE TABLE courses;
+TRUNCATE TABLE enrollments;
+TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;
+
 INSERT INTO students (name, major, email) VALUES
   ('สมชาย ใจดี', 'วิทยาการคอมพิวเตอร์', 'somchai@example.com'),
   ('สมหญิง รักเรียน', 'เทคโนโลยีสารสนเทศ', 'somying@example.com');
