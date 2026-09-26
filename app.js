@@ -1,18 +1,13 @@
-require("dotenv").config();
-
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
-const { graphqlHTTP } = require("express-graphql");
-
-const schema = require("./schema");
-const root = require("./resolvers");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 const pool = require("./db");
+
+const { redisClient } = require("./cache");
 
 const {
   hashPassword,
@@ -21,13 +16,11 @@ const {
 } = require("./auth-helpers");
 const { authenticateToken, authorizeRole } = require("./middlewares/auth");
 
-const { redisClient, connectRedis } = require("./cache");
 const { parsePagination, parseSort } = require("./middlewares/query-parser");
 
 const v1Router = express.Router();
 const v2Router = express.Router();
 
-// ลำดับ middleware มีความสำคัญ: security header → CORS → logger → body parser
 app.use(helmet());
 app.use(
   cors({
@@ -37,15 +30,6 @@ app.use(
 );
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));
-
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema: schema,
-    rootValue: root,
-    graphiql: true, // เปิดใช้งานหน้าทดสอบ GraphiQL ผ่านเบราว์เซอร์
-  }),
-);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Student API พร้อมใช้งาน" });
@@ -397,16 +381,9 @@ app.post("/api/v1/auth/login", async (req, res, next) => {
 });
 
 // 10. PUT: แก้ไขข้อมูลนักศึกษาทั้งระเบียน
-app.put("/api/v1/students/:id", (req, res) => {
-  const id = Number(req.params.id);
+app.put("/api/v1/students/:id", async (req, res, next) => {
+  const id = req.params.id;
   const { name, major, email } = req.body;
-  const student = students.find((s) => s.id === id);
-
-  if (!student) {
-    return res
-      .status(404)
-      .json({ error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" } });
-  }
 
   if (!name || !major || !email) {
     return res.status(400).json({
@@ -417,31 +394,64 @@ app.put("/api/v1/students/:id", (req, res) => {
     });
   }
 
-  student.name = name;
-  student.major = major;
-  student.email = email;
+  try {
+    const [result] = await pool.query(
+      "UPDATE students SET name = ?, major = ?, email = ? WHERE id = ?",
+      [name, major, email, id],
+    );
 
-  res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: student });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
+      });
+    }
+
+    res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ" });
+  } catch (err) {
+    next(err);
+  }
 });
 
-// 11. PATCH: แก้ไขข้อมูลนักศึกษา
-app.patch("/api/v1/students/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const student = students.find((s) => s.id === id);
+// 11. PATCH: แก้ไขข้อมูลนักศึกษาเฉพาะบางฟิลด์
+app.patch("/api/v1/students/:id", async (req, res, next) => {
+  const id = req.params.id;
+  const { name, major, email } = req.body;
 
-  if (!student) {
-    return res.status(404).json({
-      error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
-    });
+  // สร้าง Query string และ values array แบบไดนามิกตามฟิลด์ที่มีการส่งค่ามา
+  const fields = [];
+  const values = [];
+
+  if (name !== undefined) {
+    fields.push("name = ?");
+    values.push(name);
+  }
+  if (major !== undefined) {
+    fields.push("major = ?");
+    values.push(major);
+  }
+  if (email !== undefined) {
+    fields.push("email = ?");
+    values.push(email);
   }
 
-  // อัปเดตเฉพาะฟิลด์ที่ส่งมา ฟิลด์อื่นคงค่าเดิมไว้
-  const { name, major, email } = req.body;
-  if (name !== undefined) student.name = name;
-  if (major !== undefined) student.major = major;
-  if (email !== undefined) student.email = email;
+  try {
+    // นำ id ไปต่อท้ายสุดสำหรับ WHERE clause
+    values.push(id);
+    const [result] = await pool.query(
+      `UPDATE students SET ${fields.join(", ")} WHERE id = ?`,
+      values,
+    );
 
-  res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ", data: student });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        error: { code: "NOT_FOUND", message: "ไม่พบข้อมูลนักศึกษา" },
+      });
+    }
+
+    res.status(200).json({ message: "แก้ไขข้อมูลสำเร็จ" });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // 12. DELETE: ลบข้อมูลนักศึกษา
@@ -528,30 +538,12 @@ app.use((req, res) => {
   });
 });
 
-// Error-handling middleware (ต้องมีพารามิเตอร์ 4 ตัวเสมอ)
+// Error-handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  // ใช้ err.status/err.statusCode หากมี (เช่น PayloadTooLargeError จาก express.json ที่ส่งมาเป็น 413)
-  // เพื่อไม่ให้ error ที่มีรหัสสถานะของตัวเองถูกกลบด้วย 500 เสมอไป
-  const statusCode = err.status || err.statusCode || 500;
-  res.status(statusCode).json({
-    error: {
-      code: statusCode === 500 ? "INTERNAL_SERVER_ERROR" : err.type || "ERROR",
-      message:
-        statusCode === 500
-          ? "เกิดข้อผิดพลาดที่ไม่คาดคิดภายในระบบ"
-          : err.message,
-    },
+  console.error(err);
+  res.status(500).json({
+    error: { code: "INTERNAL_ERROR", message: "เกิดข้อผิดพลาดภายในระบบ" },
   });
 });
 
-connectRedis()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server กำลังทำงานที่พอร์ต ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("เชื่อมต่อ Redis ไม่สำเร็จ เซิร์ฟเวอร์จะไม่เริ่มทำงาน:", err);
-    process.exit(1);
-  });
+module.exports = app;
