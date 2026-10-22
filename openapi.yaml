@@ -1,0 +1,376 @@
+openapi: 3.0.3
+info:
+  title: Student API
+  description: API สำหรับจัดการข้อมูลนิสิต พัฒนาในรายวิชา 88736065
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "name is required"
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "สมชาย ใจดี"
+        major:
+          type: string
+          example: "เทคโนโลยีสารสนเทศ"
+        email:
+          type: string
+          example: "somchai@example.com"
+
+    StudentInput:
+      type: object
+      required:
+        - name
+        - major
+        - email
+      properties:
+        name:
+          type: string
+          example: "สมชาย ใจดี"
+        major:
+          type: string
+          example: "วิทยาการคอมพิวเตอร์"
+        email:
+          type: string
+          example: "somchai@example.com"
+
+    StudentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "สำเร็จ"
+        data:
+          $ref: "#/components/schemas/Student"
+paths:
+  /auth/register:
+    post:
+      summary: สมัครสมาชิก
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "201":
+          description: สมัครสมาชิกสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "สมัครสมาชิกสำเร็จ"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                      role:
+                        type: string
+                        example: "student"
+        "400":
+          description: ข้อมูลไม่ครบถ้วน (เช่น ขาด email หรือ password)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: อีเมลนี้มีอยู่ในระบบแล้ว (Duplicate Email)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      summary: เข้าสู่ระบบ
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: เข้าสู่ระบบสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "เข้าสู่ระบบสำเร็จ"
+                  token:
+                    type: string
+        "400":
+          description: ข้อมูลไม่ครบถ้วน (เช่น ขาด email หรือ password)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: อีเมลหรือรหัสผ่านไม่ถูกต้อง (Invalid Credentials)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      summary: ดึงข้อมูลของตนเอง
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: ดึงข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "สำเร็จ"
+                  data:
+                    type: object
+                    description: ข้อมูลผู้ใช้จาก Token
+        "401":
+          description: ไม่ได้ยืนยันตัวตนหรือ Token ไม่ถูกต้อง
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /students:
+    get:
+      summary: ดึงรายการนักศึกษาทั้งหมด
+      tags:
+        - Students
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: หมายเลขหน้าที่ต้องการ
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: จำนวนรายการต่อหน้า
+        - name: major
+          in: query
+          schema:
+            type: string
+          description: กรองตามสาขาวิชา (อ้างอิงจาก app.js)
+      responses:
+        "200":
+          description: สำเร็จ พร้อมข้อมูล pagination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "สำเร็จ"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      total:
+                        type: integer
+                      totalPages:
+                        type: integer
+        "401":
+          description: ไม่ได้แนบ Token หรือ Token ไม่ถูกต้อง
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      summary: เพิ่มข้อมูลนักศึกษาใหม่
+      tags:
+        - Students
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - major
+                - email
+              properties:
+                name:
+                  type: string
+                major:
+                  type: string
+                email:
+                  type: string
+                  format: email
+      responses:
+        "201":
+          description: เพิ่มข้อมูลสำเร็จ
+        "400":
+          description: ข้อมูลไม่ครบถ้วน
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: ไม่มีสิทธิ์เข้าถึง (เฉพาะ role admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: อีเมลนี้มีอยู่ในระบบแล้ว
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /students/{id}:
+    put:
+      summary: แก้ไขข้อมูลนักศึกษาทั้งระเบียน
+      tags:
+        - Students
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - major
+                - email
+              properties:
+                name:
+                  type: string
+                major:
+                  type: string
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: แก้ไขข้อมูลสำเร็จ
+        "400":
+          description: ข้อมูลไม่ครบถ้วน
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: ไม่พบข้อมูลนักศึกษา
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: ลบข้อมูลนักศึกษา
+      tags:
+        - Students
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: ลบข้อมูลสำเร็จ
+        "403":
+          description: ไม่มีสิทธิ์เข้าถึง (เฉพาะ role admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: ไม่พบข้อมูลนักศึกษา
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"

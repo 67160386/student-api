@@ -2,11 +2,8 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const morgan = require("morgan");
-
 const app = express();
-
 const pool = require("./db");
-
 const { redisClient } = require("./cache");
 
 const {
@@ -21,6 +18,21 @@ const { parsePagination, parseSort } = require("./middlewares/query-parser");
 const v1Router = express.Router();
 const v2Router = express.Router();
 
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("js-yaml");
+const fs = require("fs");
+const path = require("path");
+
+const openapiDocument = YAML.load(
+  fs.readFileSync(path.join(__dirname, "openapi.yaml"), "utf8"),
+);
+
+const { getStudentEnrichment } = require("./services/enrichment-service");
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openapiDocument));
+
+const { createStudentSchema } = require("./schemas/studentSchema");
+
 app.use(helmet());
 app.use(
   cors({
@@ -31,6 +43,15 @@ app.use(
 app.use(morgan("dev"));
 app.use(express.json({ limit: "10kb" }));
 
+const { authLimiter, generalLimiter } = require("./middlewares/rateLimiter");
+app.set("trust proxy", 1);
+app.use(generalLimiter);
+
+app.use("/api/v1/auth/login", authLimiter);
+
+app.use("/api/v1", v1Router);
+app.use("/api/v2", v2Router);
+
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Student API พร้อมใช้งาน" });
 });
@@ -38,6 +59,7 @@ app.get("/", (req, res) => {
 // 1. V1 GET: ดึงรายการนักศึกษาทั้งหมด
 v1Router.get(
   "/students",
+  authenticateToken,
   parsePagination,
   parseSort,
   async (req, res, next) => {
@@ -162,37 +184,82 @@ app.get("/api/v1/auth/me", authenticateToken, (req, res) => {
   res.status(200).json({ message: "สำเร็จ", data: req.user });
 });
 
+// สัปดาห์ที่ 11: ข้อมูลเสริมจาก Public API ภายนอก พร้อม Retry/Timeout/Fallback
+app.get(
+  "/api/v1/students/:id/enrichment",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const enrichment = await getStudentEnrichment(req.params.id);
+
+      return res.status(200).json({
+        data: {
+          studentId: req.params.id,
+          enrichment,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 // 5. POST: เพิ่มข้อมูลนักศึกษาใหม่
-app.post("/api/v1/students", async (req, res, next) => {
-  const { name, major, email } = req.body;
-
-  if (!name || !major || !email) {
-    return res.status(400).json({
-      error: { code: "VALIDATION_ERROR", message: "กรุณาระบุข้อมูลให้ครบถ้วน" },
-    });
-  }
-
-  try {
-    const [result] = await pool.query(
-      "INSERT INTO students (name, major, email) VALUES (?, ?, ?)",
-      [name, major, email],
-    );
-
-    await redisClient.del("students:all"); // ล้างแคชเนื่องจากข้อมูลเปลี่ยนแปลงแล้ว
-
-    res.status(201).json({
-      message: "เพิ่มข้อมูลสำเร็จ",
-      data: { id: result.insertId, name, major, email },
-    });
-  } catch (err) {
-    if (err.code === "ER_DUP_ENTRY") {
-      return res.status(409).json({
-        error: { code: "DUPLICATE_EMAIL", message: "อีเมลนี้มีอยู่ในระบบแล้ว" },
+app.post(
+  "/api/v1/students",
+  authenticateToken,
+  authorizeRole("admin"),
+  async (req, res, next) => {
+    const result = createStudentSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "ข้อมูลที่ส่งมาไม่ถูกต้อง",
+          details: result.error.issues.map((issue) => ({
+            field: issue.path.join("."),
+            message: issue.message,
+          })),
+        },
       });
     }
-    next(err);
-  }
-});
+
+    const { name, major, email } = result.data;
+
+    if (!name || !major || !email) {
+      return res.status(400).json({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "กรุณาระบุข้อมูลให้ครบถ้วน",
+        },
+      });
+    }
+
+    try {
+      const [result] = await pool.query(
+        "INSERT INTO students (name, major, email) VALUES (?, ?, ?)",
+        [name, major, email],
+      );
+
+      await redisClient.del("students:all"); // ล้างแคชเนื่องจากข้อมูลเปลี่ยนแปลงแล้ว
+
+      res.status(201).json({
+        message: "เพิ่มข้อมูลสำเร็จ",
+        data: { id: result.insertId, name, major, email },
+      });
+    } catch (err) {
+      if (err.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({
+          error: {
+            code: "DUPLICATE_EMAIL",
+            message: "อีเมลนี้มีอยู่ในระบบแล้ว",
+          },
+        });
+      }
+      next(err);
+    }
+  },
+);
 
 // 6. POST: เพิ่มข้อมูลลงทะเบียนเรียนของนักศึกษา
 app.post("/api/v1/students/:id/enrollments", async (req, res, next) => {
@@ -381,7 +448,7 @@ app.post("/api/v1/auth/login", async (req, res, next) => {
 });
 
 // 10. PUT: แก้ไขข้อมูลนักศึกษาทั้งระเบียน
-app.put("/api/v1/students/:id", async (req, res, next) => {
+app.put("/api/v1/students/:id", authenticateToken, async (req, res, next) => {
   const id = req.params.id;
   const { name, major, email } = req.body;
 
@@ -527,9 +594,6 @@ app.delete(
     }
   },
 );
-
-app.use("/api/v1", v1Router);
-app.use("/api/v2", v2Router);
 
 // 404: ไม่พบ route ที่ร้องขอ (ต้องอยู่หลัง route ทั้งหมด)
 app.use((req, res) => {

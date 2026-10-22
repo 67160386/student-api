@@ -1,0 +1,23 @@
+{
+	"id": "7e0ea7c5-c65c-4ba5-a108-c1a0a6c41c74",
+	"name": "student-api-dev",
+	"values": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "default",
+			"enabled": true,
+			"secret": true
+		}
+	],
+	"color": null,
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2026-10-22T14:55:36.140Z",
+	"_postman_exported_using": "Postman/12.31.7"
+}

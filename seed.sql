@@ -19,3 +19,7 @@ INSERT INTO enrollments (student_id, course_id) VALUES
   (1, 1),
   (1, 2),
   (2, 2);
+
+INSERT INTO users (email, password_hash, role) VALUES
+  ('admin@example.com', '$2b$10$CmWvWJ9SJV0whc3lMfy4l.zlvWAoyow3mD2F93nyBZdZyiGnUwYha', 'admin'),
+  ('student@example.com', '$2b$10$DCs7O2/FiQkay5LUUxg9CuqrdmlzjDpJ2JEpzcp0QRS2wHiwFR4HW', 'student');

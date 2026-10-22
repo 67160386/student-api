@@ -1,0 +1,1261 @@
+{
+  "info": {
+    "_collection_link": "https://go.postman.co/collection/56421931-c714c3e6-52f0-430b-98fd-68afdb8523ff?source=collection_link",
+    "_exporter_id": "56421931",
+    "_postman_id": "c714c3e6-52f0-430b-98fd-68afdb8523ff",
+    "name": "Student API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "item": [
+        {
+          "item": [
+            {
+              "name": "POST 200 /auth/login",
+              "request": {
+                "auth": {
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\r\n    \"email\": \"admin@example.com\",\r\n    \"password\": \"Passw0rd!\"\r\n}"
+                },
+                "header": [
+                  {
+                    "key": "Bearer",
+                    "value": "{{authToken}}"
+                  }
+                ],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ],
+                  "raw": "{{baseUrl}}/auth/login"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"message\": \"เข้าสู่ระบบสำเร็จ\",\n  \"token\": \"{{vault:json_web_token_0flq}}\"\n}",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "271"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"10f-vn9mC+ScJfufjmA7ZdzdahxMxPk\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 07:40:48 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "POST 200 /auth/login",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\r\n    \"email\": \"admin@example.com\",\r\n    \"password\": \"Passw0rd!\"\r\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "",
+                        "value": ""
+                      }
+                    ],
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ],
+                      "raw": "{{baseUrl}}/auth/login"
+                    }
+                  },
+                  "status": "OK"
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// ตรวจสอบว่า Status Code เป็น 401\r\npm.test(\"Status code is 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\n// ตรวจสอบว่ามี error code ส่งกลับมา\r\npm.test(\"Response has error code\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.error).to.have.property(\"code\");\r\n});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "POST 401 /auth/login",
+              "request": {
+                "auth": {
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\r\n    \"email\": \"admin@example.com\",\r\n    \"password\": \"wrongPassw0rd!\"\r\n}"
+                },
+                "header": [
+                  {
+                    "key": "Bearer",
+                    "value": "{{authToken}}"
+                  }
+                ],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ],
+                  "raw": "{{baseUrl}}/auth/login"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"error\": {\n    \"code\": \"INVALID_CREDENTIALS\",\n    \"message\": \"อีเมลหรือรหัสผ่านไม่ถูกต้อง\"\n  }\n}",
+                  "code": 401,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "134"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"86-sMAEJpP2ehQiW7XedlqpT+ppxpE\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 08:26:42 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "POST 401 /auth/login",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\r\n    \"email\": \"admin@example.com\",\r\n    \"password\": \"wrongPassw0rd!\"\r\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "Bearer",
+                        "value": "{{authToken}}"
+                      }
+                    ],
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ],
+                      "raw": "{{baseUrl}}/auth/login"
+                    }
+                  },
+                  "status": "Unauthorized"
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// ตรวจสอบว่า Status Code เป็น 201\r\npm.test(\"Status code is 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// ตรวจสอบว่า Response มีข้อมูล pagination ส่งกลับมา\r\npm.test(\"Response has pagination info\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.data).to.have.property(\"id\");\r\n});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "POST 201 /auth/register",
+              "request": {
+                "auth": {
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\r\n    \"email\": \"test@example.com\",\r\n    \"password\": \"Passw0rd!\"\r\n}"
+                },
+                "header": [
+                  {
+                    "key": "Bearer",
+                    "value": "{{authToken}}"
+                  }
+                ],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ],
+                  "raw": "{{baseUrl}}/auth/register"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"message\": \"สมัครสมาชิกสำเร็จ\",\n  \"data\": {\n    \"id\": 3,\n    \"email\": \"test@example.com\",\n    \"role\": \"student\"\n  }\n}",
+                  "code": 201,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "125"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"7d-hDbhrzXEO3WOHjCJv4Hfcd254Pc\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 08:37:57 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "POST 201 /auth/register",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\r\n    \"email\": \"test@example.com\",\r\n    \"password\": \"Passw0rd!\"\r\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "Bearer",
+                        "value": "{{authToken}}"
+                      }
+                    ],
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "register"
+                      ],
+                      "raw": "{{baseUrl}}/auth/register"
+                    }
+                  },
+                  "status": "Created"
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// ตรวจสอบว่า Status Code เป็น 409 Bad Request\r\npm.test(\"Status code is 409\", function () {\r\n    pm.response.to.have.status(409);\r\n});\r\n\r\n// ตรวจสอบว่ามีโครงสร้าง error ส่งกลับมา\r\npm.test(\"Response has error code\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.error).to.have.property(\"code\");\r\n});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "POST 409 /auth/register",
+              "request": {
+                "auth": {
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\r\n    \"email\": \"test@example.com\",\r\n    \"password\": \"Passw0rd!\"\r\n}"
+                },
+                "header": [
+                  {
+                    "key": "Bearer",
+                    "value": "{{authToken}}"
+                  }
+                ],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ],
+                  "raw": "{{baseUrl}}/auth/register"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_EMAIL\",\n    \"message\": \"อีเมลนี้มีอยู่ในระบบแล้ว\"\n  }\n}",
+                  "code": 409,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "121"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"79-GsS5Jf3/K1u9QMmkyzdSbJtaQs8\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 08:38:58 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "POST 409 /auth/register",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\r\n    \"email\": \"test@example.com\",\r\n    \"password\": \"Passw0rd!\"\r\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "Bearer",
+                        "value": "{{authToken}}"
+                      }
+                    ],
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "register"
+                      ],
+                      "raw": "{{baseUrl}}/auth/register"
+                    }
+                  },
+                  "status": "Conflict"
+                }
+              ]
+            }
+          ],
+          "name": "Auth"
+        },
+        {
+          "item": [
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// ตรวจสอบว่า Status Code เป็น 200\r\npm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\n// ตรวจสอบว่า Response มีข้อมูล pagination ส่งกลับมา\r\npm.test(\"Response has pagination info\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body).to.have.property(\"pagination\");\r\n});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "GET 200 /students",
+              "request": {
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{authToken}}"
+                    }
+                  ],
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": ""
+                },
+                "header": [
+                  {
+                    "key": "Bearer",
+                    "value": "{{authToken}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students"
+                  ],
+                  "raw": "{{baseUrl}}/students"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"สมชาย ใจดี\",\n      \"major\": \"วิทยาการคอมพิวเตอร์\",\n      \"email\": \"somchai@example.com\",\n      \"created_at\": \"2026-10-04T07:40:40.000Z\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"สมหญิง รักเรียน\",\n      \"major\": \"เทคโนโลยีสารสนเทศ\",\n      \"email\": \"somying@example.com\",\n      \"created_at\": \"2026-10-04T07:40:40.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 2,\n    \"totalPages\": 1\n  }\n}",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "480"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"1e0-MRUxJQJHcfMbmSaSJt0U0BM8UkU\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 07:41:04 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "GET 200 /students",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": ""
+                    },
+                    "header": [
+                      {
+                        "key": "Bearer",
+                        "value": "{{authToken}}"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "students"
+                      ],
+                      "raw": "{{baseUrl}}/students"
+                    }
+                  },
+                  "status": "OK"
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// ตรวจสอบว่า Status Code เป็น 201 (Created)\r\npm.test(\"Status code is 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// ตรวจสอบว่ามีข้อมูล data ส่งกลับมา\r\npm.test(\"Response has data object\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body).to.have.property(\"data\");\r\n});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "POST 201 /students",
+              "request": {
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{authToken}}"
+                    }
+                  ],
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\r\n    \"name\": \"nameTest\",\r\n    \"major\": \"majorTest\",\r\n    \"email\": \"email@test.com\"\r\n}"
+                },
+                "header": [],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students"
+                  ],
+                  "raw": "{{baseUrl}}/students"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"message\": \"เพิ่มข้อมูลสำเร็จ\",\n  \"data\": {\n    \"id\": 3,\n    \"name\": \"nameTest\",\n    \"major\": \"majorTest\",\n    \"email\": \"email@test.com\"\n  }\n}",
+                  "code": 201,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "144"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"90-ar5UlFJ9UBYYgPeV9nZ3fKNPWSk\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 07:41:12 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "POST 201 /students",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\r\n    \"name\": \"nameTest\",\r\n    \"major\": \"majorTest\",\r\n    \"email\": \"email@test.com\"\r\n}"
+                    },
+                    "header": [],
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "students"
+                      ],
+                      "raw": "{{baseUrl}}/students"
+                    }
+                  },
+                  "status": "Created"
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// ตรวจสอบว่า Status Code เป็น 400 Bad Request\r\npm.test(\"Status code is 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\n// ตรวจสอบว่ามีโครงสร้าง error ส่งกลับมา\r\npm.test(\"Response has error code\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.error).to.have.property(\"code\");\r\n});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "POST 400 /students",
+              "request": {
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{authToken}}"
+                    }
+                  ],
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\r\n    \"name\": \"nameTest\",\r\n    \"major\": \"majorTest\"\r\n}"
+                },
+                "header": [],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students"
+                  ],
+                  "raw": "{{baseUrl}}/students"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"กรุณาระบุข้อมูลให้ครบถ้วน\"\n  }\n}",
+                  "code": 400,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "125"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"7d-SLhYBs4RAWmJY17RhSkfwutVFcs\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 07:41:23 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "POST 400 /students",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\r\n    \"name\": \"nameTest\",\r\n    \"major\": \"majorTest\"\r\n}"
+                    },
+                    "header": [],
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "students"
+                      ],
+                      "raw": "{{baseUrl}}/students"
+                    }
+                  },
+                  "status": "Bad Request"
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// ตรวจสอบว่า Status Code เป็น 409 Bad Request\r\npm.test(\"Status code is 409\", function () {\r\n    pm.response.to.have.status(409);\r\n});\r\n\r\n// ตรวจสอบว่ามีโครงสร้าง error ส่งกลับมา\r\npm.test(\"Response has error code\", function () {\r\n    const body = pm.response.json();\r\n    pm.expect(body.error).to.have.property(\"code\");\r\n});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "POST 409 /students",
+              "request": {
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{authToken}}"
+                    }
+                  ],
+                  "type": "bearer"
+                },
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\r\n    \"name\": \"nameTest\",\r\n    \"major\": \"majorTest\",\r\n    \"email\": \"email@test.com\"\r\n}"
+                },
+                "header": [],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "students"
+                  ],
+                  "raw": "{{baseUrl}}/students"
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_EMAIL\",\n    \"message\": \"อีเมลนี้มีอยู่ในระบบแล้ว\"\n  }\n}",
+                  "code": 409,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "content-security-policy",
+                      "value": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests"
+                    },
+                    {
+                      "key": "cross-origin-opener-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "cross-origin-resource-policy",
+                      "value": "same-origin"
+                    },
+                    {
+                      "key": "origin-agent-cluster",
+                      "value": "?1"
+                    },
+                    {
+                      "key": "referrer-policy",
+                      "value": "no-referrer"
+                    },
+                    {
+                      "key": "strict-transport-security",
+                      "value": "max-age=31536000; includeSubDomains"
+                    },
+                    {
+                      "key": "x-content-type-options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "x-dns-prefetch-control",
+                      "value": "off"
+                    },
+                    {
+                      "key": "x-download-options",
+                      "value": "noopen"
+                    },
+                    {
+                      "key": "x-frame-options",
+                      "value": "SAMEORIGIN"
+                    },
+                    {
+                      "key": "x-permitted-cross-domain-policies",
+                      "value": "none"
+                    },
+                    {
+                      "key": "x-xss-protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "content-type",
+                      "value": "application/json; charset=utf-8"
+                    },
+                    {
+                      "key": "content-length",
+                      "value": "121"
+                    },
+                    {
+                      "key": "etag",
+                      "value": "W/\"79-GsS5Jf3/K1u9QMmkyzdSbJtaQs8\""
+                    },
+                    {
+                      "key": "date",
+                      "value": "Sun, 04 Oct 2026 08:27:41 GMT"
+                    },
+                    {
+                      "key": "connection",
+                      "value": "keep-alive"
+                    },
+                    {
+                      "key": "keep-alive",
+                      "value": "timeout=5"
+                    }
+                  ],
+                  "name": "POST 409 /students",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\r\n    \"name\": \"nameTest\",\r\n    \"major\": \"majorTest\",\r\n    \"email\": \"email@test.com\"\r\n}"
+                    },
+                    "header": [],
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "students"
+                      ],
+                      "raw": "{{baseUrl}}/students"
+                    }
+                  },
+                  "status": "Conflict"
+                }
+              ]
+            }
+          ],
+          "name": "Students"
+        }
+      ],
+      "name": "Student API"
+    }
+  ]
+}

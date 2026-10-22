@@ -19,4 +19,9 @@ function generateToken(user) {
   );
 }
 
+// สร้างรหัสผ่านที่ผ่านการ Hash (Bcrypt)
+// bcrypt.hash("Passw0rd!", 10).then((hash) => {
+//   console.log("นำค่านี้ไปใส่ใน seed.sql ->", hash);
+// });
+
 module.exports = { hashPassword, verifyPassword, generateToken };

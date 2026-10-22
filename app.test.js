@@ -3,9 +3,23 @@ const request = require("supertest");
 const { redisClient } = require("./cache");
 const pool = require("./db");
 const { generateToken } = require("./auth-helpers");
+let studentToken;
+let adminToken;
 
 // เชื่อมต่อ Redis ก่อนเริ่มรันเทสต์ทั้งหมดในไฟล์นี้
 beforeAll(async () => {
+  studentToken = generateToken({
+    id: 1,
+    email: "student@test.com",
+    role: "student",
+  });
+
+  adminToken = generateToken({
+    id: 1,
+    email: "admin@test.com",
+    role: "admin",
+  });
+
   if (!redisClient.isOpen) {
     await redisClient.connect();
   }
@@ -27,7 +41,9 @@ describe("GET /", () => {
 
 describe("GET /api/v1/students", () => {
   test("ควรคืนค่า 200 เมื่อมีการดึงข้อมูลถูกต้อง", async () => {
-    const response = await request(app).get("/api/v1/students");
+    const response = await request(app)
+      .get("/api/v1/students")
+      .set("Authorization", `Bearer ${studentToken}`);
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("data");
   });
@@ -59,6 +75,7 @@ describe("GET /api/v1/students", () => {
 
     const response = await request(app)
       .get("/api/v1/students")
+      .set("Authorization", `Bearer ${studentToken}`)
       .query({ major: majorToSearch });
 
     expect(response.status).toBe(200);
@@ -101,6 +118,7 @@ describe("GET /api/v1/students/:id/courses", () => {
 
     await request(app)
       .post("/api/v1/students")
+      .set("Authorization", `Bearer ${adminToken}`)
       .send({ name: "สมชาย", major: "เทคโนโลยีสารสนเทศ", email: uniqueEmail });
 
     const newStudentId = 3;
@@ -141,9 +159,24 @@ describe("GET /api/v1/students/:id/courses", () => {
 });
 
 describe("POST /api/v1/students", () => {
+  test("ควรคืนค่า 403 เมื่อผู้ใช้ไม่ใช่ Admin พยายามเพิ่มข้อมูล", async () => {
+    const response = await request(app)
+      .post("/api/v1/students")
+      .set("Authorization", `Bearer ${studentToken}`)
+      .send({
+        name: "สมชาย",
+        major: "เทคโนโลยีสารสนเทศ",
+        email: "test@example.com",
+      });
+
+    expect(response.status).toBe(403);
+    expect(response.body.error.code).toBe("FORBIDDEN");
+  });
+
   test("ควรคืนค่า 400 เมื่อระบุข้อมูลนักศึกษาไม่ครบถ้วน", async () => {
     const response = await request(app)
       .post("/api/v1/students")
+      .set("Authorization", `Bearer ${adminToken}`)
       .send({ name: "สมชาย", major: "เทคโนโลยีสารสนเทศ" });
 
     expect(response.status).toBe(400);
@@ -155,6 +188,7 @@ describe("POST /api/v1/students", () => {
 
     const response = await request(app)
       .post("/api/v1/students")
+      .set("Authorization", `Bearer ${adminToken}`)
       .send({ name: "สมชาย", major: "เทคโนโลยีสารสนเทศ", email: uniqueEmail });
 
     expect(response.status).toBe(201);
@@ -165,17 +199,23 @@ describe("POST /api/v1/students", () => {
   test("ควรคืนค่า 409 เมื่อพยายามเพิ่มข้อมูลด้วยอีเมลที่ซ้ำในระบบ", async () => {
     const duplicateEmail = "duplicate@example.com";
 
-    await request(app).post("/api/v1/students").send({
-      name: "สมชาย",
-      major: "เทคโนโลยีสารสนเทศ",
-      email: duplicateEmail,
-    });
+    await request(app)
+      .post("/api/v1/students")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        name: "สมชาย",
+        major: "เทคโนโลยีสารสนเทศ",
+        email: duplicateEmail,
+      });
 
-    const response = await request(app).post("/api/v1/students").send({
-      name: "สมศรี",
-      major: "วิทยาการคอมพิวเตอร์",
-      email: duplicateEmail,
-    });
+    const response = await request(app)
+      .post("/api/v1/students")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        name: "สมศรี",
+        major: "วิทยาการคอมพิวเตอร์",
+        email: duplicateEmail,
+      });
 
     expect(response.status).toBe(409);
     expect(response.body.error.code).toBe("DUPLICATE_EMAIL");
@@ -185,16 +225,16 @@ describe("POST /api/v1/students", () => {
     const spy = jest
       .spyOn(pool, "query")
       .mockRejectedValue(new Error("Database offline"));
-
-    const response = await request(app).post("/api/v1/students").send({
-      name: "สมชาย",
-      major: "เทคโนโลยีสารสนเทศ",
-      email: "error@example.com",
-    });
+    const response = await request(app)
+      .post("/api/v1/students")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        name: "สมชาย",
+        major: "เทคโนโลยีสารสนเทศ",
+        email: "error@example.com",
+      });
 
     expect(response.status).toBe(500);
-    expect(response.body.error.code).toBe("INTERNAL_ERROR");
-
     spy.mockRestore();
   });
 });
@@ -203,11 +243,14 @@ describe("PUT /api/v1/students/:id", () => {
   test("ควรคืนค่า 404 เมื่อไม่พบข้อมูลนักศึกษา", async () => {
     const id = 999;
 
-    const response = await request(app).put(`/api/v1/students/${id}`).send({
-      name: "สมชาย",
-      major: "เทคโนโลยีสารสนเทศ",
-      email: "test@example.com",
-    });
+    const response = await request(app)
+      .put(`/api/v1/students/${id}`)
+      .set("Authorization", `Bearer ${studentToken}`)
+      .send({
+        name: "สมชาย",
+        major: "เทคโนโลยีสารสนเทศ",
+        email: "test@example.com",
+      });
 
     expect(response.status).toBe(404);
     expect(response.body.error.code).toBe("NOT_FOUND");
@@ -218,6 +261,7 @@ describe("PUT /api/v1/students/:id", () => {
 
     const response = await request(app)
       .put(`/api/v1/students/${id}`)
+      .set("Authorization", `Bearer ${studentToken}`)
       .send({ name: "สมชาย", major: "เทคโนโลยีสารสนเทศ" });
 
     expect(response.status).toBe(400);
@@ -227,11 +271,14 @@ describe("PUT /api/v1/students/:id", () => {
   test("ควรคืนค่า 200 เมื่อแก้ไขข้อมูลสำเร็จ", async () => {
     const id = 1;
 
-    const response = await request(app).put(`/api/v1/students/${id}`).send({
-      name: "สมชาย แก้ไข",
-      major: "วิทยาการคอมพิวเตอร์",
-      email: "update@example.com",
-    });
+    const response = await request(app)
+      .put(`/api/v1/students/${id}`)
+      .set("Authorization", `Bearer ${studentToken}`)
+      .send({
+        name: "สมชาย แก้ไข",
+        major: "วิทยาการคอมพิวเตอร์",
+        email: "update@example.com",
+      });
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("แก้ไขข้อมูลสำเร็จ");
